@@ -1,11 +1,11 @@
 const net = require('net');
 const server = net.createServer();
 
-server.on('connection', (ctps) => {
+server.on('connection', (clientToProxySocket) => {
     // console.log("::=> Conn. Proxy Server <::");
 
     // write code to create http proxy server
-    ctps.once('data', (data) => {
+    clientToProxySocket.once('data', (data) => {
         // console.log(data.toString());
 
         // HTTPs requests has CONNECT in the data.
@@ -22,37 +22,40 @@ server.on('connection', (ctps) => {
             port = 80
         }
         // creating a proxy to server connection here.
-        let ptss = net.createConnection({
+        let ProxyToServerSocket = net.createConnection({
             host: host,
             port: port
         }, () => {
             console.log(`::======> proxy ---------> ${host}:${port} connection established`);
         });
 
-        // 
         if(ishttps){
-            ctps.write("HTTP/1.1 200 OK\r\n\r\n");
+            clientToProxySocket.write("HTTP/1.1 200 OK\r\n\r\n");
         } else {
-            ptss.write(data);
+            ProxyToServerSocket.write(data);
         }
 
-        console.log(ctps)
+        // console.log(clientToProxySocket)
         // piping the request-->client stream to proxy->server stream
         // and vice versa.
-        ctps.pipe(ptss);
-        ptss.pipe(ctps);
+        clientToProxySocket.pipe(ProxyToServerSocket);
+        ProxyToServerSocket.pipe(clientToProxySocket);
 
         // error logggers.
-        ptss.on('error', (err) => {
+        ProxyToServerSocket.on('error', (err) => {
             console.log("proxy error")
             console.log(err);
         });
 
-        ctps.on('error', (err) => {
+        clientToProxySocket.on('error', (err) => {
             console.log("socket error")
             console.log(err);
         }); 
     });
+
+    clientToProxySocket.on('close', () => {
+        console.log("::=> Client to Proxy Server Closed !! <::");
+    })
 });
 
 server.on("error", (err) => {

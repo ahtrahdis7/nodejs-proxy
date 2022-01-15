@@ -66,8 +66,9 @@ server.on("close", () => {
     console.log("Server closed");
 });
 
+const PORT = process.env.PORT
 server.listen({
-    port: 8000
+    port: PORT
 }, () => {
-    console.log("Server started & 0.0.0.0:8000");
+    console.log(`Server started & 0.0.0.0:${PORT}`);
 })

@@ -67,7 +67,6 @@ server.on("close", () => {
 });
 
 server.listen({
-    host: "0.0.0.0",
     port: 8000
 }, () => {
     console.log("Server started & 0.0.0.0:8000");
